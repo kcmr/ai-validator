@@ -11,6 +11,11 @@ jobs:
       github.event.issue.pull_request != null &&
       startsWith(github.event.comment.body, '/validate')
     runs-on: ubuntu-latest
+    permissions:
+      models: read
+      issues: write
+      pull-requests: write
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,13 +55,15 @@ jobs:
 
       - name: Run agent
         working-directory: agent
+        continue-on-error: true
         env:
           PROMPT: ${{ env.PROMPT }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL || 'https://models.github.ai/inference' }}
           LLM_MODEL_NAME: ${{ secrets.LLM_MODEL_NAME || 'openai/gpt-4o-mini' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          uv run ai-validator-agent "$PROMPT" | tee ../agent_output.txt
+          uv run ai-validator-agent "$PROMPT" 2>&1 | tee ../agent_output.txt || echo "Agent execution failed" >> ../agent_output.txt
 
       - name: Publish playwright report artifact
         id: upload-artifact
@@ -69,6 +76,7 @@ jobs:
         uses: actions/github-script@v7
         env:
           PROMPT: ${{ env.PROMPT }}
+          ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
         with:
           script: |
             const fs = require('fs');
@@ -81,19 +89,12 @@ jobs:
               agentOutput = 'No output was captured from the agent execution.';
             }
 
-            // Get the list of artifacts for this workflow run
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.runId
-            });
-
-            // Find the playwright-report artifact
-            const playwrightArtifact = artifacts.data.artifacts.find(artifact => artifact.name === 'playwright-report');
-
+            // Get the artifact URL from the upload step
+            const artifactUrl = process.env.ARTIFACT_URL;
             let artifactLink = `[workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
-            if (playwrightArtifact) {
-              artifactLink = `[playwright-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${playwrightArtifact.id})`;
+
+            if (artifactUrl) {
+              artifactLink = `[playwright-report artifact](${artifactUrl})`;
             }
 
             // Create the comment body

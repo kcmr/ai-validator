@@ -1,21 +1,10 @@
-import asyncio
+import sys
 
-from agents.validator import agent, run_sync
-
-user_prompt = (
-    "Navega a http://localhost:3000 e introduce 'fake_user' en el campo de "
-    "usuario y 'fake_password' en el campo de contraseña y envía el formulario."
-    "Verifica que la respuesta contiene 'Credenciales recibidas' e incluye "
-    "el nombre de usuario introducido."
-)
+from agents.validator import run_sync
 
 
-def _main_sync():
-    run_sync(user_prompt)
-
-
-async def _main_async():
-    await agent.to_cli()
+def _main_sync(prompt: str):
+    run_sync(prompt)
 
 
 def main() -> None:
@@ -23,5 +12,17 @@ def main() -> None:
 
     Wraps the async implementation so `[project.scripts]` can call it.
     """
-    # asyncio.run(_main_async())
-    _main_sync()
+    # Get the prompt from command line arguments
+    if len(sys.argv) < 2:
+        default_prompt = (
+            "Navega a http://localhost:3000 e introduce 'fake_user' en el campo de "
+            "usuario y 'fake_password' en el campo de contraseña y envía el formulario."
+            "Verifica que la respuesta contiene 'Credenciales recibidas' e incluye "
+            "el nombre de usuario introducido."
+        )
+        print("No prompt provided. Using default prompt.")
+        prompt = default_prompt
+    else:
+        prompt = " ".join(sys.argv[1:])
+
+    _main_sync(prompt)

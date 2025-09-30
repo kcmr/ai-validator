@@ -56,7 +56,63 @@ jobs:
           uv run ai-validator-agent "$PROMPT" | tee ../agent_output.txt
 
       - name: Publish playwright report artifact
+        id: upload-artifact
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: agent/playwright-report/
+
+      - name: Comment PR with agent output
+        uses: actions/github-script@v7
+        env:
+          PROMPT: ${{ env.PROMPT }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read the agent output
+            let agentOutput = '';
+            try {
+              agentOutput = fs.readFileSync('agent_output.txt', 'utf8');
+            } catch (error) {
+              agentOutput = 'No output was captured from the agent execution.';
+            }
+
+            // Get the list of artifacts for this workflow run
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            });
+
+            // Find the playwright-report artifact
+            const playwrightArtifact = artifacts.data.artifacts.find(artifact => artifact.name === 'playwright-report');
+
+            let artifactLink = `[workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+            if (playwrightArtifact) {
+              artifactLink = `[playwright-report artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${playwrightArtifact.id})`;
+            }
+
+            // Create the comment body
+            const commentBody = `## 🤖 AI Validator Agent Results
+
+            **Prompt:** \`${process.env.PROMPT || 'Not available'}\`
+
+            ### Agent Output:
+            \`\`\`
+            ${agentOutput}
+            \`\`\`
+
+            ### 📹 Video Report
+            A video recording of the validation process has been generated. You can download it from the ${artifactLink}.
+
+            ---
+            *This comment was generated automatically by the AI Validator Agent workflow.*`;
+
+            // Post the comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });

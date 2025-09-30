@@ -1,0 +1,18 @@
+# Node
+node_modules/
+.npm/
+.next/
+out/
+coverage/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Editor
+.DS_Store
+.idea/
+.vscode/

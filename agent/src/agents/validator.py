@@ -1,7 +1,8 @@
 import random
 
-from llm_models import github_model
 from pydantic_ai import Agent
+
+from llm_models import github_model
 
 agent = Agent(
     model=github_model,

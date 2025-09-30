@@ -1,6 +1,7 @@
-from config.settings import settings
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.github import GitHubProvider
+
+from config.settings import settings
 
 github_model = OpenAIChatModel(
     settings.llm_model_name,

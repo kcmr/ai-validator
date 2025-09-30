@@ -29,7 +29,7 @@ agent = Agent(
         """,
     toolsets=servers,
     model_settings={
-        "temperature": 0.2,
+        # "temperature": 0.2,
         "timeout": 300.0,
     },
 )

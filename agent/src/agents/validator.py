@@ -28,6 +28,9 @@ agent = Agent(
         Return a concise summary of the results of your tests in markdown format.
         """,
     toolsets=servers,
+    model_settings={
+        "temperature": 0.2,
+    },
 )
 
 

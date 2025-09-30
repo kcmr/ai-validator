@@ -41,6 +41,10 @@ jobs:
         working-directory: agent
         run: uv run playwright install chromium --with-deps
 
+      - name: Install Playwright MCP server
+        working-directory: agent
+        run: npm install @playwright/mcp@latest
+
       - name: Prepare prompt from comment
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}

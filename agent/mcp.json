@@ -4,7 +4,11 @@
       "command": "npx",
       "args": [
         "@playwright/mcp@latest", 
-        "--browser=chrome"
+        "--browser=chrome",
+        "--headless",
+        "--output-dir=./playwright-report",
+        "--save-video=800x600",
+        "--viewport-size=1024x768"
       ]
     }
   }

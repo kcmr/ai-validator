@@ -13,6 +13,9 @@ __pycache__/
 .env
 *.egg-info/
 
+# Reports
+playwright-report/
+
 
 # Editor
 .DS_Store

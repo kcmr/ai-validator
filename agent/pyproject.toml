@@ -1,19 +1,34 @@
-[build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "ai-validator-agent"
 version = "0.1.0"
 description = "Agente MCP con Pydantic AI para validar instrucciones sobre la demo web."
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 readme = "README.md"
 dependencies = [
-  "pydantic-ai>=0.0.8",
-  "playwright>=1.44.0",
-  "mcp>=0.1.0",
-  "typer>=0.12.3"
+  "pydantic>=2.11.7",
+  "pydantic-ai>=0.8.0",
+  "pydantic-settings>=2.10.1",
 ]
 
 [project.scripts]
-ai-validator-agent = "ai_validator_agent.run:main"
+ai-validator-agent = "ai_validator_agent.__init__:main"
+
+[build-system]
+requires = ["uv_build>=0.8.13,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C90"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.10",
+]

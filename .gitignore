@@ -11,6 +11,8 @@ __pycache__/
 *.pyc
 .venv/
 .env
+*.egg-info/
+
 
 # Editor
 .DS_Store

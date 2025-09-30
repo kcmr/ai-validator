@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic_ai import Agent
 from pydantic_ai.mcp import load_mcp_servers
 
-from llm_models import github_model
+from llm_models import open_ai_model
 
 # Get the project root directory
 project_root = Path(__file__).parent.parent.parent
@@ -13,7 +13,7 @@ servers = load_mcp_servers(str(mcp_file_path))
 print(f"Loaded {len(servers)} servers from {mcp_file_path}")
 
 agent = Agent(
-    model=github_model,
+    model=open_ai_model,
     system_prompt="""
         You are an AI agent specialized in functional testing of web applications.
         

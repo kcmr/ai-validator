@@ -2,7 +2,10 @@ import asyncio
 
 from agents.validator import agent, run_sync
 
-user_prompt = "¿Cuántos días tiene un año bisiesto?"
+user_prompt = (
+    "Navega a http://localhost:3000 y comprueba que se pueden introducir "
+    "datos en el formulario y enviarlos."
+)
 
 
 def _main_sync():
@@ -18,5 +21,5 @@ def main() -> None:
 
     Wraps the async implementation so `[project.scripts]` can call it.
     """
-    asyncio.run(_main_async())
-    # _main_sync()
+    # asyncio.run(_main_async())
+    _main_sync()

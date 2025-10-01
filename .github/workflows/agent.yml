@@ -12,6 +12,7 @@ jobs:
       startsWith(github.event.comment.body, '/validate')
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       models: read
       issues: write
       pull-requests: write

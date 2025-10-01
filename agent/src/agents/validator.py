@@ -26,6 +26,9 @@ agent = Agent(
         outcomes are achieved.
 
         Return a concise summary of the results of your tests in markdown format.
+        Output format: markdown
+        Always start your response with "## Test Results" mark text.
+        Always end your response with "<eof>" mark text.
         """,
     toolsets=servers,
     model_settings={

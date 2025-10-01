@@ -91,11 +91,30 @@ jobs:
             const fs = require('fs');
 
             // Read the agent output
-            let agentOutput = '';
+            let rawAgentOutput = '';
             try {
-              agentOutput = fs.readFileSync('agent_output.txt', 'utf8');
+              rawAgentOutput = fs.readFileSync('agent_output.txt', 'utf8');
             } catch (error) {
-              agentOutput = 'No output was captured from the agent execution.';
+              rawAgentOutput = 'No output was captured from the agent execution.';
+            }
+
+            // Extract content between markers
+            let processedOutput = '';
+            const startMarker = '## Test Results';
+            const endMarker = '<eof>';
+
+            const startIndex = rawAgentOutput.indexOf(startMarker);
+            const endIndex = rawAgentOutput.indexOf(endMarker);
+
+            if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+              // Extract content including start marker but excluding end marker
+              processedOutput = rawAgentOutput.substring(startIndex, endIndex).trim();
+            } else if (startIndex !== -1) {
+              // If only start marker found, take everything from start marker
+              processedOutput = rawAgentOutput.substring(startIndex).trim();
+            } else {
+              // If no markers found, use the raw output
+              processedOutput = `## Test Results\n\nNo properly formatted test results found. Raw output:\n\`\`\`\n${rawAgentOutput}\n\`\`\``;
             }
 
             // Get the artifact URL from the upload step
@@ -106,15 +125,12 @@ jobs:
               artifactLink = `[playwright-report artifact](${artifactUrl})`;
             }
 
-            // Create the comment body
+            // Create the comment body with processed output
             const commentBody = `## 🤖 AI Validator Agent Results
 
             **Prompt:** \`${process.env.PROMPT || 'Not available'}\`
 
-            ### Agent Output:
-            \`\`\`
-            ${agentOutput}
-            \`\`\`
+            ${processedOutput}
 
             ### 📹 Video Report
             A video recording of the validation process has been generated. You can download it from the ${artifactLink}.

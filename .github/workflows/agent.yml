@@ -138,10 +138,35 @@ jobs:
             ---
             *This comment was generated automatically by the AI Validator Agent workflow.*`;
 
-            // Post the comment
-            await github.rest.issues.createComment({
+            // Look for existing workflow comments
+            const comments = await github.rest.issues.listComments({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: commentBody
             });
+
+            // Find existing AI Validator Agent comment
+            const botComment = comments.data.find(comment => 
+              comment.body.includes('🤖 AI Validator Agent Results') &&
+              comment.body.includes('*This comment was generated automatically by the AI Validator Agent workflow.*')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+              console.log(`Updated existing comment ID: ${botComment.id}`);
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+              console.log('Created new comment');
+            }

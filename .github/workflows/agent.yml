@@ -39,31 +39,27 @@ jobs:
         working-directory: agent
         run: uv sync --no-dev
 
-      - name: Get Playwright version
-        id: playwright-version
-        working-directory: agent
-        run: |
-          PLAYWRIGHT_VERSION=$(npx playwright --version | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
-          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
-          echo "Playwright version: $PLAYWRIGHT_VERSION"
-
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          key: playwright-browsers-${{ runner.os }}-chromium
           restore-keys: |
-            playwright-${{ runner.os }}-
+            playwright-browsers-${{ runner.os }}-
+
+      - name: Check cache status
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            echo "✅ Cache hit: Playwright browsers restored from cache"
+            ls -la ~/.cache/ms-playwright/ || echo "Cache directory exists but is empty"
+          else
+            echo "❌ Cache miss: Browsers will be downloaded"
+          fi
 
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: agent
         run: npx playwright install chromium --only-shell
-
-      - name: Verify Playwright browsers
-        working-directory: agent
-        run: npx playwright install chromium --only-shell --dry-run || npx playwright install chromium --only-shell
 
       - name: Prepare prompt from comment
         env:

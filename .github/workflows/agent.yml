@@ -58,6 +58,7 @@ jobs:
           fi
 
       - name: Install Playwright browsers
+        if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
         working-directory: agent
         run: npx playwright install chromium --only-shell
 

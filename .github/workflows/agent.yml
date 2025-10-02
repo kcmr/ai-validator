@@ -39,9 +39,9 @@ jobs:
         working-directory: agent
         run: uv sync --no-dev
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        id: playwright-cache
+      - name: Restore Playwright browsers cache
+        uses: actions/cache/restore@v4
+        id: playwright-cache-restore
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ runner.os }}-chromium
@@ -50,7 +50,7 @@ jobs:
 
       - name: Check cache status
         run: |
-          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+          if [ "${{ steps.playwright-cache-restore.outputs.cache-hit }}" = "true" ]; then
             echo "✅ Cache hit: Playwright browsers restored from cache"
             ls -la ~/.cache/ms-playwright/ || echo "Cache directory exists but is empty"
           else
@@ -60,6 +60,13 @@ jobs:
       - name: Install Playwright browsers
         working-directory: agent
         run: npx playwright install chromium --only-shell
+
+      - name: Save Playwright browsers cache
+        if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-chromium
 
       - name: Prepare prompt from comment
         env:

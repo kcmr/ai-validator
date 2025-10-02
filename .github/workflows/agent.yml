@@ -83,42 +83,69 @@ jobs:
           name: playwright-report
           path: agent/playwright-report/
 
+      - name: Parse agent output
+        id: parse-output
+        run: |
+          # Read the agent output
+          if [ ! -f agent_output.txt ]; then
+            echo "status=unknown" >> $GITHUB_OUTPUT
+            echo "details=No output file found" >> $GITHUB_OUTPUT
+            echo "processed_output=## Test Results\n\n**Status:** ❓ Unknown\n\nNo output was captured from the agent execution." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          RAW_OUTPUT=$(cat agent_output.txt)
+
+          # Extract JSON more precisely - look for the last complete JSON object with status and details
+          # This helps avoid capturing JSON from dependency installations or other tools
+          JSON_OUTPUT=$(echo "$RAW_OUTPUT" | grep -o '{[^{}]*"status"[^{}]*"details"[^{}]*}' | tail -1 || echo "")
+
+          # If no simple JSON found, try multi-line JSON extraction
+          if [ -z "$JSON_OUTPUT" ]; then
+            # Look for JSON blocks that span multiple lines, focusing on the agent's structured output
+            JSON_OUTPUT=$(echo "$RAW_OUTPUT" | sed -n '/^{$/,/^}$/p' | grep -A 20 -B 5 '"status"' | grep -A 20 -B 5 '"details"' | head -50 | jq -s '.[0] // empty' 2>/dev/null || echo "")
+          fi
+
+          if [ -n "$JSON_OUTPUT" ] && echo "$JSON_OUTPUT" | jq . >/dev/null 2>&1; then
+            # Successfully parsed JSON
+            STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status // "unknown"')
+            DETAILS=$(echo "$JSON_OUTPUT" | jq -r '.details // "No details available"')
+            
+            # Format the processed output
+            if [ "$STATUS" = "success" ]; then
+              STATUS_TEXT="✅ Success"
+            elif [ "$STATUS" = "failure" ]; then
+              STATUS_TEXT="❌ Failure"
+            else
+              STATUS_TEXT="❓ Unknown"
+            fi
+            
+            PROCESSED_OUTPUT="## Test Results\n\n**Status:** $STATUS_TEXT\n\n$DETAILS"
+          else
+            # No valid JSON found - show a clean error message
+            STATUS="parse_error"
+            DETAILS="Could not extract structured test results from agent output"
+            PROCESSED_OUTPUT="## Test Results\n\n**Status:** ❌ Parse Error\n\nCould not extract structured test results from agent output. Please check that the agent is returning valid JSON with 'status' and 'details' fields."
+          fi
+
+          # Set outputs
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "details<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$DETAILS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "processed_output<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$PROCESSED_OUTPUT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Comment PR with agent output
         uses: actions/github-script@v7
         env:
           PROMPT: ${{ env.PROMPT }}
           ARTIFACT_URL: ${{ steps.upload-artifact.outputs.artifact-url }}
+          TEST_STATUS: ${{ steps.parse-output.outputs.status }}
+          PROCESSED_OUTPUT: ${{ steps.parse-output.outputs.processed_output }}
         with:
           script: |
-            const fs = require('fs');
-
-            // Read the agent output
-            let rawAgentOutput = '';
-            try {
-              rawAgentOutput = fs.readFileSync('agent_output.txt', 'utf8');
-            } catch (error) {
-              rawAgentOutput = 'No output was captured from the agent execution.';
-            }
-
-            // Extract content between markers
-            let processedOutput = '';
-            const startMarker = '## Test Results';
-            const endMarker = '<eof>';
-
-            const startIndex = rawAgentOutput.indexOf(startMarker);
-            const endIndex = rawAgentOutput.indexOf(endMarker);
-
-            if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-              // Extract content including start marker but excluding end marker
-              processedOutput = rawAgentOutput.substring(startIndex, endIndex).trim();
-            } else if (startIndex !== -1) {
-              // If only start marker found, take everything from start marker
-              processedOutput = rawAgentOutput.substring(startIndex).trim();
-            } else {
-              // If no markers found, use the raw output
-              processedOutput = `## Test Results\n\nNo properly formatted test results found. Raw output:\n\`\`\`\n${rawAgentOutput}\n\`\`\``;
-            }
-
             // Get the artifact URL from the upload step
             const artifactUrl = process.env.ARTIFACT_URL;
             let artifactLink = `[workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
@@ -127,12 +154,16 @@ jobs:
               artifactLink = `[playwright-report artifact](${artifactUrl})`;
             }
 
-            // Create the comment body with processed output
-            const commentBody = `## 🤖 AI Validator Agent Results
+            // Get status emoji based on test result
+            const testStatus = process.env.TEST_STATUS || 'unknown';
+            const statusEmoji = testStatus === 'success' ? '✅' : testStatus === 'failure' ? '❌' : '🤖';
+
+            // Create the comment body with processed output from jq
+            const commentBody = `## ${statusEmoji} AI Validator Agent Results
 
             **Prompt:** \`${process.env.PROMPT || 'Not available'}\`
 
-            ${processedOutput}
+            ${process.env.PROCESSED_OUTPUT}
 
             ### 📹 Video Report
             A video recording of the validation process has been generated. You can download it from the ${artifactLink}.

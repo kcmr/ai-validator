@@ -9,7 +9,8 @@ jobs:
   run-agent:
     if: >-
       github.event.issue.pull_request != null &&
-      startsWith(github.event.comment.body, '/validate')
+      startsWith(github.event.comment.body, '/validate') &&
+      github.event.comment.user.login == 'kcmr'
     runs-on: ubuntu-latest
     permissions:
       contents: read

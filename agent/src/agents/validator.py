@@ -1,5 +1,7 @@
 from pathlib import Path
+from typing import Literal
 
+from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.mcp import load_mcp_servers
 
@@ -12,9 +14,16 @@ mcp_file_path = project_root / "mcp.json"
 servers = load_mcp_servers(str(mcp_file_path))
 print(f"Loaded {len(servers)} servers from {mcp_file_path}")
 
+
+class ResponseModel(BaseModel):
+    status: Literal["success", "failure"]
+    details: str
+
+
 agent = Agent(
     model=open_ai_model,
     system_prompt="""
+        <system>
         You are an AI agent specialized in functional testing of web applications.
         
         Your task is to validate the proper functioning of a web application by 
@@ -24,12 +33,15 @@ agent = Agent(
         the web application. You can use these tools to navigate through the 
         application, fill out forms, click buttons, and verify that the expected 
         outcomes are achieved.
+        </system>
 
-        Return a concise summary of the results of your tests in markdown format.
-        Output format: markdown
-        Always start your response with "## Test Results" mark text.
-        Always end your response with "<eof>" mark text.
+        <output>
+        Return a concise summary of the results of your tests in markdown format and
+        the status of the tests as "success" or "failure". If any test fails, 
+        consider the overall status as "failure".
+        </output>
         """,
+    output_type=ResponseModel,
     toolsets=servers,
     model_settings={
         # "temperature": 0.2,
@@ -40,7 +52,10 @@ agent = Agent(
 
 def run_sync(user_prompt: str):
     response = agent.run_sync(user_prompt)
-    print(response.output)
+    if isinstance(response.output, str):
+        print(response.output)
+    else:
+        print(response.output.model_dump_json(indent=2))
 
 
 async def run_stream():

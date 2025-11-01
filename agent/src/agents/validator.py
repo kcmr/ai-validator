@@ -24,6 +24,15 @@ def get_tools() -> Sequence[AbstractToolset[None] | ToolsetFunc[None]] | None:
     return mcp_servers
 
 
+def save_message_logs(agent_run):
+    reports_dir = Path("reports")
+    reports_dir.mkdir(exist_ok=True)
+
+    if agent_run and agent_run.result is not None:
+        with open(reports_dir / "agent_run_result.json", "wb") as f:
+            f.write(agent_run.result.all_messages_json())
+
+
 agent = Agent(
     model=models["gemini"],
     instructions=functional_testing_prompt,
@@ -43,5 +52,4 @@ async def run(user_prompt: str):
             log_stream(node)
 
     if agent_run and agent_run.result is not None:
-        with open("reports/agent_run_result.json", "wb") as f:
-            f.write(agent_run.result.all_messages_json())
+        save_message_logs(agent_run)

@@ -23,3 +23,5 @@ logs_*
 .DS_Store
 .idea/
 .vscode/
+
+docs/reference/

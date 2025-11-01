@@ -20,7 +20,13 @@ Follow these steps to perform a functional test:
    - Verifying that the correct page is displayed
    - Checking for specific text or elements on the page
 
-4. **Report any issues**: If you encounter any problems during testing, document them 
+4. **Save evidences**: For each major step, save a screenshot of the application state.
+  - Screenshot path: `screenshots/`
+  - Ensure the screenshots are not white or blank.
+  - Name screenshots descriptively based on the action performed, e.g.,
+    `01_login_page.png`, `02_form_submission.png`, etc.
+
+5. **Report any issues**: If you encounter any problems during testing, document them 
   clearly. Include:
    - Steps to reproduce the issue
    - Expected vs. actual results

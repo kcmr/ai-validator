@@ -22,22 +22,20 @@ models: dict[str, OpenAIChatModel | GoogleModel] = {
         model_name="gemini-2.5-flash",
         provider=GoogleProvider(api_key=settings.llm_api_key),
     ),
-    "ollama": {
-        "mistral": OpenAIChatModel(
-            model_name="mistral:7b-instruct",
-            provider=_ollama_provider,
-        ),
-        "llama": OpenAIChatModel(
-            model_name="llama3.1:8b",
-            provider=_ollama_provider,
-        ),
-        "deepseek": OpenAIChatModel(
-            model_name="deepseek-r1:8b",
-            provider=_ollama_provider,
-        ),
-        "qwen": OpenAIChatModel(
-            model_name="qwen2.5:7b-instruct",
-            provider=_ollama_provider,
-        ),
-    },
+    "ollama_mistral": OpenAIChatModel(
+        model_name="mistral:7b-instruct",
+        provider=_ollama_provider,
+    ),
+    "ollama_llama": OpenAIChatModel(
+        model_name="llama3.1:8b",
+        provider=_ollama_provider,
+    ),
+    "ollama_deepseek": OpenAIChatModel(
+        model_name="deepseek-r1:8b",
+        provider=_ollama_provider,
+    ),
+    "ollama_qwen": OpenAIChatModel(
+        model_name="qwen2.5:7b-instruct",
+        provider=_ollama_provider,
+    ),
 }

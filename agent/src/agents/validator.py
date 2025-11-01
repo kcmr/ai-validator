@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.mcp import load_mcp_servers
 
-from llm_models import open_ai_model
+from llm_models import models
 from prompts import functional_testing_prompt
 
 # Get the project root directory
@@ -22,14 +22,11 @@ class ResponseModel(BaseModel):
 
 
 agent = Agent(
-    model=open_ai_model,
+    model=models["gemini"],
     instructions=functional_testing_prompt,
     output_type=ResponseModel,
     toolsets=servers,
-    model_settings={
-        # "temperature": 0.2,
-        "timeout": 300.0,
-    },
+    retries=5,
 )
 
 

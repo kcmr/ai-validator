@@ -27,8 +27,8 @@ Follow these steps to perform a functional test:
    - Any error messages or screenshots that may help diagnose the problem
 
 <output_format>
-  Return a concise summary of the results of your tests in markdown format and
+  Return a concise summary of the results of your tests and
   the status of the tests as "success" or "failure". If any test fails, 
-  consider the overall status as "failure".
+  consider the overall status as "failure". Respond in English.
 </output_format>
 """

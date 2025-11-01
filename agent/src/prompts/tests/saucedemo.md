@@ -49,19 +49,18 @@ Swag Labs es una aplicación de e-commerce de demostración diseñada para pract
 
 #### 2.1 Visualización de Productos
 - **Objetivo**: Verificar que se muestra correctamente el catálogo de productos
-- **Precondiciones**: Usuario autenticado
+- **Precondiciones**: Usuario autenticado (user: standard_user, password: secret_sauce)
 - **Resultado Esperado**:
   - Se muestran todos los productos disponibles
   - Cada producto muestra: nombre, descripción, precio, imagen y botón "Add to cart"
   - Los productos se cargan correctamente
 - **Criterios de Aceptación**:
   - Mínimo 6 productos visibles
-  - Todos los elementos están correctamente alineados
   - Las imágenes se cargan sin errores
 
 #### 2.2 Ordenamiento de Productos
 - **Objetivo**: Verificar que el sistema ordena los productos correctamente
-- **Precondiciones**: Usuario en la página de inventario
+- **Precondiciones**: Usuario autenticado en la página de inventario (user: standard_user, password: secret_sauce)
 - **Opciones de Ordenamiento a Probar**:
   1. Name (A to Z)
   2. Name (Z to A)
@@ -74,6 +73,7 @@ Swag Labs es una aplicación de e-commerce de demostración diseñada para pract
 
 #### 2.3 Información de Productos
 - **Objetivo**: Verificar que la información de cada producto es correcta
+- **Precondiciones**: Usuario autenticado en la página de producto (user: standard_user, password: secret_sauce)
 - **Criterios de Aceptación**:
   - Nombre del producto visible
   - Descripción completa del producto

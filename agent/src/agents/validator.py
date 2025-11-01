@@ -6,6 +6,7 @@ from pydantic_ai import Agent
 from pydantic_ai.mcp import load_mcp_servers
 
 from llm_models import open_ai_model
+from prompts import functional_testing_prompt
 
 # Get the project root directory
 project_root = Path(__file__).parent.parent.parent
@@ -22,25 +23,7 @@ class ResponseModel(BaseModel):
 
 agent = Agent(
     model=open_ai_model,
-    system_prompt="""
-        <system>
-        You are an AI agent specialized in functional testing of web applications.
-        
-        Your task is to validate the proper functioning of a web application by 
-        performing a series of tests based on the provided user prompt.
-
-        To do so, you are provided with a set of tools that allow you to interact with 
-        the web application. You can use these tools to navigate through the 
-        application, fill out forms, click buttons, and verify that the expected 
-        outcomes are achieved.
-        </system>
-
-        <output>
-        Return a concise summary of the results of your tests in markdown format and
-        the status of the tests as "success" or "failure". If any test fails, 
-        consider the overall status as "failure".
-        </output>
-        """,
+    instructions=functional_testing_prompt,
     output_type=ResponseModel,
     toolsets=servers,
     model_settings={

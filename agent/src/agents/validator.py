@@ -1,13 +1,13 @@
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Literal
 
-from pydantic import BaseModel, Field
 from pydantic_ai import AbstractToolset, Agent, ToolsetFunc
 from pydantic_ai.mcp import load_mcp_servers
 
 from llm_models import models
+from models import ResponseModel
 from prompts import functional_testing_prompt
+from utils import log_stream
 
 
 def get_tools() -> Sequence[AbstractToolset[None] | ToolsetFunc[None]] | None:
@@ -18,11 +18,6 @@ def get_tools() -> Sequence[AbstractToolset[None] | ToolsetFunc[None]] | None:
     print(f"Loaded {len(mcp_servers)} servers from {mcp_file_path}")
 
     return mcp_servers
-
-
-class ResponseModel(BaseModel):
-    status: Literal["success", "failure"]
-    details: str = Field(..., description="Concise summary of the test results")
 
 
 agent = Agent(
@@ -41,7 +36,7 @@ async def run(user_prompt: str):
         agent_run = agent_event
         async for node in agent_run:
             nodes.append(node)
-            print(node)
+            log_stream(node)
 
     if agent_run and agent_run.result is not None:
         with open("reports/agent_run_result.json", "wb") as f:

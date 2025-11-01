@@ -9,7 +9,8 @@
         "--viewport-size=1920x1080",
         "--isolated",
         "--image-responses=omit",
-        "--no-sandbox"
+        "--no-sandbox",
+        "--headless"
       ]
     }
   }

@@ -48,15 +48,28 @@ def _log_call_tools(node: Any) -> None:
         tool_name = getattr(part, "tool_name", "unknown")
 
         if "ToolCall" in part_type:
+            params_info = _get_tool_params(part)
             console.print(
                 f"[bold magenta]🔧 Tool calling request[/bold magenta] "
-                f"Calling tool: [cyan]{tool_name}[/cyan]"
+                f"Calling tool: [cyan]{tool_name}[/cyan] "
+                f"with params: [yellow]{params_info}[/yellow]"
             )
         elif "ToolReturn" in part_type:
             console.print(
                 f"[bold green]✅ Tool calling response[/bold green] "
                 f"Tool '[cyan]{tool_name}[/cyan]' completed"
             )
+
+
+def _get_tool_params(part: Any) -> str:
+    """Extract and format tool call parameters."""
+    try:
+        if hasattr(part, "args_as_dict"):
+            return part.args_as_dict()
+    except Exception:
+        pass
+
+    return ""
 
 
 def _log_end() -> None:

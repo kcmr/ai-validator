@@ -1,12 +1,10 @@
+import asyncio
 import shutil
 import sys
 from pathlib import Path
 
-from agents.validator import run_sync
-
-
-def _main_sync(prompt: str):
-    run_sync(prompt)
+from agents.validator import run
+from prompts import simple_user_prompt
 
 
 def _clean_report_folder() -> None:
@@ -26,15 +24,14 @@ def main() -> None:
 
     # Get the prompt from command line arguments
     if len(sys.argv) < 2:
-        default_prompt = (
-            "Navega a http://localhost:3000 e introduce 'fake_user' en el campo de "
-            "usuario y 'fake_password' en el campo de contraseña y envía el formulario."
-            "Verifica que la respuesta contiene 'Credenciales recibidas' e incluye "
-            "el nombre de usuario introducido."
-        )
+        default_prompt = simple_user_prompt
         print("No prompt provided. Using default prompt.")
         prompt = default_prompt
     else:
         prompt = " ".join(sys.argv[1:])
 
-    _main_sync(prompt)
+    asyncio.run(run(prompt))
+
+
+if __name__ == "__main__":
+    main()

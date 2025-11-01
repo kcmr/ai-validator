@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     llm_api_key: str = Field(default="your-api-key")
     llm_max_tokens: int = Field(default=1024)
     github_token: str = Field(default="your-github-token")
+    logfire_token: str = Field(default="your-logfire-token")
 
     model_config = SettingsConfigDict(env_file=".env")
 

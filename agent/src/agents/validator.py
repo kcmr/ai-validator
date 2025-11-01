@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from pathlib import Path
 
+import logfire
 from pydantic_ai import AbstractToolset, Agent, ToolsetFunc
 from pydantic_ai.mcp import load_mcp_servers
 
@@ -8,6 +9,9 @@ from llm_models import models
 from models import ResponseModel
 from prompts import functional_testing_prompt
 from utils import log_stream
+
+logfire.configure()
+logfire.instrument_pydantic_ai()
 
 
 def get_tools() -> Sequence[AbstractToolset[None] | ToolsetFunc[None]] | None:

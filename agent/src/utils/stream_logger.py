@@ -2,11 +2,13 @@ from typing import Any
 
 from pydantic_ai._agent_graph import CallToolsNode, ModelRequestNode, UserPromptNode
 from pydantic_graph import End
+from rich.console import Console
+
+console = Console()
 
 
 def log_stream(node: Any) -> None:
     """Log the agent event stream node."""
-
     if isinstance(node, UserPromptNode):
         _log_user_prompt(node)
     elif isinstance(node, ModelRequestNode):
@@ -22,12 +24,15 @@ def _log_user_prompt(node: Any) -> None:
     user_prompt = node.user_prompt
     if isinstance(user_prompt, str):
         preview = user_prompt[:100] if len(user_prompt) > 100 else user_prompt
-        print(f"📝 User Prompt: {preview}...")
+        console.print(f"[bold blue]📝 User Prompt:[/bold blue] [dim]{preview}...[/dim]")
 
 
 def _log_model_request() -> None:
     """Log model request node."""
-    print("💭 [THINKING] Model is processing request...")
+    console.print(
+        "[bold yellow]💭 Thinking...[/bold yellow] "
+        "[dim]Model is processing request[/dim]"
+    )
 
 
 def _log_call_tools(node: Any) -> None:
@@ -43,11 +48,17 @@ def _log_call_tools(node: Any) -> None:
         tool_name = getattr(part, "tool_name", "unknown")
 
         if "ToolCall" in part_type:
-            print(f"🔧 [TOOL CALLING REQUEST] Calling tool: {tool_name}")
+            console.print(
+                f"[bold magenta]🔧 Tool calling request[/bold magenta] "
+                f"Calling tool: [cyan]{tool_name}[/cyan]"
+            )
         elif "ToolReturn" in part_type:
-            print(f"✅ [TOOL CALLING RESPONSE] Tool '{tool_name}' completed")
+            console.print(
+                f"[bold green]✅ Tool calling response[/bold green] "
+                f"Tool '[cyan]{tool_name}[/cyan]' completed"
+            )
 
 
 def _log_end() -> None:
     """Log end node."""
-    print("🏁 Execution completed")
+    console.print("[bold green]🏁 Execution completed[/bold green]")

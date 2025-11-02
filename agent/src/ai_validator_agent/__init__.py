@@ -12,8 +12,8 @@ app = typer.Typer(help="AI Validator Agent - Validate web applications with AI")
 
 
 def _clean_report_folder() -> None:
-    """Clean the playwright-report folder before execution."""
-    report_path = Path(__file__).parent.parent.parent / "playwright-report"
+    """Clean the reports folder before execution."""
+    report_path = Path(__file__).parent.parent.parent / "reports"
     if report_path.exists():
         shutil.rmtree(report_path)
 

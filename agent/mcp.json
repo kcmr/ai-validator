@@ -4,7 +4,7 @@
       "command": "npx",
       "args": [
         "@playwright/mcp@latest", 
-        "--output-dir=./playwright-report",
+        "--output-dir=./reports",
         "--save-video=1440x810",
         "--viewport-size=1920x1080",
         "--isolated",

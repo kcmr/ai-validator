@@ -5,6 +5,9 @@ on:
     types:
       - created
 
+env:
+  PLAYWRIGHT_VERSION: 1.56.1
+
 jobs:
   run-agent:
     if: >-
@@ -47,7 +50,7 @@ jobs:
         id: playwright-cache-restore
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ runner.os }}-chromium
+          key: playwright-browsers-${{ runner.os }}-chromium-${{ env.PLAYWRIGHT_VERSION }}
           restore-keys: |
             playwright-browsers-${{ runner.os }}-
 
@@ -58,14 +61,14 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
         run: |
           echo "📥 Installing Playwright browsers..."
-          npx playwright install chromium --with-deps
+          npx playwright install chromium --only-shell
 
       - name: Save Playwright browsers cache
         if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ runner.os }}-chromium
+          key: playwright-browsers-${{ runner.os }}-chromium-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Prepare prompt from comment
         env:

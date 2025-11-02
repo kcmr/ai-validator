@@ -77,8 +77,11 @@ jobs:
           trigger = "/validate"
           prompt = comment[len(trigger):].strip() if comment.startswith(trigger) else comment
 
-          Path("agent_prompt.txt").write_text(prompt, encoding="utf-8")
+          # Save prompt as markdown file
+          prompt_file = Path("agent/user_prompt.md")
+          prompt_file.write_text(prompt, encoding="utf-8")
 
+          # Also set environment variable for reference
           github_env_path = os.environ["GITHUB_ENV"]
           with open(github_env_path, "a", encoding="utf-8") as env_file:
               env_file.write("PROMPT<<EOF\n")
@@ -90,7 +93,6 @@ jobs:
         working-directory: agent
         continue-on-error: true
         env:
-          PROMPT: ${{ env.PROMPT }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           # Only used with GitHub Models
           LLM_MODEL_NAME: ${{ vars.LLM_MODEL_NAME || 'openai/gpt-4o-mini' }}
@@ -98,7 +100,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
         run: |
           echo "🚀 Starting AI validator agent..."
-          uv run ai-validator-agent --text "$PROMPT" 2>&1 | tee ../agent_output.txt || echo "Agent execution failed" >> ../agent_output.txt
+          uv run ai-validator-agent --file user_prompt.md 2>&1 | tee ../agent_output.txt || echo "Agent execution failed" >> ../agent_output.txt
 
       - name: Publish playwright report artifact
         id: upload-artifact

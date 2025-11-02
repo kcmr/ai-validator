@@ -68,25 +68,57 @@ jobs:
       - name: Prepare prompt from comment
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
+        working-directory: agent
         run: |
           python <<'PY'
           import os
+          import sys
           from pathlib import Path
 
+          # Get comment body from environment
           comment = os.environ.get("COMMENT_BODY", "").strip()
+          if not comment:
+              print("ERROR: No comment body found", file=sys.stderr)
+              sys.exit(1)
+
+          # Extract prompt after /validate trigger
           trigger = "/validate"
-          prompt = comment[len(trigger):].strip() if comment.startswith(trigger) else comment
+          if not comment.startswith(trigger):
+              print(f"ERROR: Comment does not start with '{trigger}'", file=sys.stderr)
+              sys.exit(1)
 
-          # Save prompt as markdown file
-          prompt_file = Path("agent/user_prompt.md")
-          prompt_file.write_text(prompt, encoding="utf-8")
+          # Get prompt content after trigger, handling potential whitespace
+          prompt = comment[len(trigger):].lstrip()
+          if not prompt:
+              print("ERROR: No prompt content found after trigger", file=sys.stderr)
+              sys.exit(1)
 
-          # Also set environment variable for reference
-          github_env_path = os.environ["GITHUB_ENV"]
-          with open(github_env_path, "a", encoding="utf-8") as env_file:
-              env_file.write("PROMPT<<EOF\n")
-              env_file.write(prompt)
-              env_file.write("\nEOF\n")
+          # Decode escape sequences properly (handle \n, \t, etc.)
+          # This handles GitHub's text which may contain literal escape sequences
+          try:
+              # First try to decode as-is, then handle any literal escape sequences
+              prompt_decoded = prompt.encode().decode('utf-8')
+          except:
+              prompt_decoded = prompt
+
+          # Save prompt as markdown file in current directory
+          prompt_file = Path("user_prompt.md")
+          try:
+              with open(prompt_file, "w", encoding="utf-8", newline="") as f:
+                  f.write(prompt_decoded)
+              print(f"✓ Prompt saved to {prompt_file.absolute()}")
+              print(f"✓ Prompt size: {len(prompt_decoded)} bytes")
+          except Exception as e:
+              print(f"ERROR: Failed to save prompt file: {e}", file=sys.stderr)
+              sys.exit(1)
+
+          # Also set environment variable for reference in parent workflow
+          github_env_path = os.environ.get("GITHUB_ENV", "")
+          if github_env_path:
+              with open(github_env_path, "a", encoding="utf-8") as env_file:
+                  env_file.write("PROMPT<<EOF\n")
+                  env_file.write(prompt_decoded)
+                  env_file.write("\nEOF\n")
           PY
 
       - name: Run agent

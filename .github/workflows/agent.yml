@@ -92,9 +92,9 @@ jobs:
         env:
           PROMPT: ${{ env.PROMPT }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_BASE_URL: ${{ vars.LLM_BASE_URL || 'https://models.github.ai/inference' }}
+          # Only used with GitHub Models
           LLM_MODEL_NAME: ${{ vars.LLM_MODEL_NAME || 'openai/gpt-4o-mini' }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LOGFIRE_TOKEN: ${{ secrets.LOGFIRE_TOKEN }}
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
         run: |
           echo "🚀 Starting AI validator agent..."

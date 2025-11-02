@@ -51,29 +51,12 @@ jobs:
           restore-keys: |
             playwright-browsers-${{ runner.os }}-
 
-      - name: Check cache status
-        run: |
-          if [ "${{ steps.playwright-cache-restore.outputs.cache-hit }}" = "true" ]; then
-            echo "✅ Cache hit: Playwright browsers restored from cache"
-            ls -la ~/.cache/ms-playwright/ || echo "Cache directory exists but is empty"
-          else
-            echo "❌ Cache miss: Browsers will be downloaded"
-          fi
-
       - name: Install Playwright browsers
         if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
         working-directory: agent
-        run: npx playwright install chromium --only-shell
-
-      - name: Verify Playwright browsers are ready
-        working-directory: agent
         run: |
-          echo "Verifying Playwright browsers are properly installed and accessible..."
-          npx playwright install chromium --only-shell --dry-run || {
-            echo "Browsers not properly available, forcing reinstall..."
-            npx playwright install chromium --only-shell --force
-          }
-          echo "✅ Playwright browsers verification complete"
+          echo "📥 Installing Playwright browsers..."
+          npx playwright install chromium --with-deps
 
       - name: Save Playwright browsers cache
         if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
@@ -113,13 +96,7 @@ jobs:
           LLM_MODEL_NAME: ${{ vars.LLM_MODEL_NAME || 'openai/gpt-4o-mini' }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
         run: |
-          # Pre-flight check: Verify browser availability before running agent
-          echo "🔍 Pre-flight check: Verifying Playwright setup..."
-          npx playwright --version
-          ls -la ~/.cache/ms-playwright/ || echo "No playwright cache found"
-
           echo "🚀 Starting AI validator agent..."
           uv run ai-validator-agent --text "$PROMPT" 2>&1 | tee ../agent_output.txt || echo "Agent execution failed" >> ../agent_output.txt
 

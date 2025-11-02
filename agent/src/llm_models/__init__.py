@@ -30,6 +30,7 @@ models: dict[str, OpenAIChatModel | GoogleModel] = {
         model_name="llama3.1:8b",
         provider=_ollama_provider,
     ),
+    # Does not support tool function calling
     "ollama_deepseek": OpenAIChatModel(
         model_name="deepseek-r1:8b",
         provider=_ollama_provider,

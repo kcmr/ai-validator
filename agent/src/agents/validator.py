@@ -1,3 +1,4 @@
+import json
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -13,6 +14,8 @@ from utils import log_stream
 logfire.configure()
 logfire.instrument_pydantic_ai()
 
+REPORTS_DIR = Path("reports")
+
 
 def get_tools() -> Sequence[AbstractToolset[None] | ToolsetFunc[None]] | None:
     project_root = Path(__file__).parent.parent.parent
@@ -25,12 +28,20 @@ def get_tools() -> Sequence[AbstractToolset[None] | ToolsetFunc[None]] | None:
 
 
 def save_message_logs(agent_run):
-    reports_dir = Path("reports")
-    reports_dir.mkdir(exist_ok=True)
+    REPORTS_DIR.mkdir(exist_ok=True)
 
     if agent_run and agent_run.result is not None:
-        with open(reports_dir / "agent_run_result.json", "wb") as f:
+        with open(REPORTS_DIR / "agent_run_result.json", "wb") as f:
             f.write(agent_run.result.all_messages_json())
+
+
+def save_result(result: ResponseModel) -> None:
+    """Save the final validation result to result.json."""
+    REPORTS_DIR.mkdir(exist_ok=True)
+
+    if result is not None:
+        with open(REPORTS_DIR / "result.json", "w") as f:
+            json.dump(result.model_dump(), f, indent=2, ensure_ascii=False)
 
 
 agent = Agent(
@@ -54,3 +65,4 @@ async def run(user_prompt: str):
 
     if agent_run and agent_run.result is not None:
         save_message_logs(agent_run)
+        save_result(agent_run.result.output)

@@ -2,16 +2,11 @@
 test: saucedemo_login
 url: https://www.saucedemo.com/
 title: Casos de Prueba para la Funcionalidad de Login en SauceDemo
-description: >
-  Este documento detalla los casos de prueba para la funcionalidad de login en la aplicación SauceDemo.
-
 ---
 
-## Casos de Prueba para la Funcionalidad de Login en SauceDemo
+# Autenticación de Usuarios
 
-### 1. Autenticación de Usuarios
-
-#### 1.1 Login Exitoso
+## 1 Login Exitoso
 - **Objetivo**: Verificar que los usuarios pueden iniciar sesión correctamente
 - **Precondiciones**: Usuario en la página de login
 - **Pasos**:
@@ -24,7 +19,7 @@ description: >
   - Se muestra el menú de navegación
   - Se visualiza la lista de productos
 
-#### 1.2 Login con Credenciales Inválidas
+## 2 Login con Credenciales Inválidas
 - **Objetivo**: Verificar que el sistema rechaza credenciales incorrectas
 - **Precondiciones**: Usuario en la página de login (previamente logout)
 - **Pasos**:

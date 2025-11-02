@@ -34,6 +34,7 @@ def save_message_logs(agent_run):
 
 
 agent = Agent(
+    name="Validator Agent",
     model=models["gemini"],
     instructions=functional_testing_prompt,
     output_type=ResponseModel,

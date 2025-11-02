@@ -24,6 +24,7 @@ dependencies = [
     { name = "pydantic-ai" },
     { name = "pydantic-settings" },
     { name = "rich" },
+    { name = "tenacity" },
     { name = "typer" },
 ]
 
@@ -40,6 +41,7 @@ requires-dist = [
     { name = "pydantic-ai", specifier = ">=0.8.0" },
     { name = "pydantic-settings", specifier = ">=2.10.1" },
     { name = "rich", specifier = ">=14.2.0" },
+    { name = "tenacity", specifier = ">=8.2.0" },
     { name = "typer", specifier = ">=0.15.1" },
 ]
 
